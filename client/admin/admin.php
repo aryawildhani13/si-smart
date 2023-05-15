@@ -1,8 +1,9 @@
 <?php
 include_once('../template/header.php');
 include_once('../../api/auth/access_control.php');
-user_access(['Super Admin']);
+user_access('admin', 'admin.php');
 
+$user_id = $_SESSION['user_id'];
 $sql = "SELECT * FROM role";
 $data_hak_akses = $db->query($sql) or die($db);
 $data_hak_akses->fetch_assoc();
@@ -18,6 +19,11 @@ if (isset($_GET['edit'])) {
     foreach ($result as $key => $value) {
         $hak_akses_admin[] = $value['id_role'];
     }
+    if (count($hak_akses_admin) > 0) {
+    } else {
+        $_SESSION['toast'] = ['icon' => 'error', 'title' => 'Data hak akses tidak ditemukan', 'icon_color' => 'red', 'text' => 'Silahkan hapus data, lalu buat ulang'];
+        redirect('admin.php');
+    }
 } else {
     $sql = "SELECT * FROM admin";
     $result = $db->query($sql) or die($db);
@@ -26,7 +32,7 @@ if (isset($_GET['edit'])) {
 
 ?>
 
-<div id="anggota_kelas" class="w-full min-h-screen flex">
+<div class="w-full min-h-screen flex">
     <?php include_once '../components/dashboard_sidebar.php' ?>
     <div class="w-full flex flex-col">
         <div class="p-4 sm:ml-64">
@@ -42,7 +48,6 @@ if (isset($_GET['edit'])) {
 
             <?php if (isset($_GET['edit'])) : ?>
                 <?php generate_breadcrumb([['title' => 'Staff Administrasi', 'filename' => 'admin.php'], ['title' => 'Edit Staff Administrasi', 'filename' => '#']]); ?>
-
                 <?php foreach ($result as $key => $admin_data) :  ?>
                     <div class="flex gap-5 mt-5 flex-col md:flex-row">
                         <div class="flex flex-1 flex-col gap-5 bg-gray-200 dark:bg-gray-700 shadow-lg rounded p-5">
@@ -120,7 +125,7 @@ if (isset($_GET['edit'])) {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($result as $key => $value) : ?>
+                            <?php foreach ($result as $main_key => $value) : ?>
                                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                     <th class="px-6 py-4 text-amber-500"></th>
                                     <td class="px-6 py-4"><?= $value['nama'] ?></td>
@@ -150,23 +155,30 @@ if (isset($_GET['edit'])) {
                                             : $range->format('%R%a days/%R%y years');
                                         ?>
                                     </td>
-                                    
+
                                     <td class="px-6 py-4 flex gap-2">
-                                        <a class="btn btn--outline-blue group" href="?edit=<?= $value['id_admin'] ?>">
-                                            <i class="ri-edit-box-line text-blue-500 group-hover:text-white"></i>
-                                        </a>
-                                        <form action="../../api/admin/admin.php" method="post">
-                                            <button class="btn btn--outline-blue group" type="submit" name="delete" value="<?= $value['id_admin'] ?>"><i class="ri-delete-bin-6-line text-red-500 group-hover:text-white"></i></button>
-                                        </form>
+                                        <?php if ($roles->num_rows > 0) : ?>
+                                            <a class="btn btn--outline-blue" href="?edit=<?= $value['id_admin'] ?>">
+                                                <i class="ri-edit-box-line"></i>
+                                            </a>
+                                        <?php else : ?>
+                                            <a class="btn btn--transparent">
+                                                <i class="ri-edit-box-line text-transparent"></i>
+                                            </a>
+                                        <?php endif ?>
+
+                                        <?php if ($value['id_admin'] !== $user_id) : ?>
+                                            <button onclick="generateConfirmationDialog('../../api/admin/admin.php', {delete: '<?= $value['id_admin'] ?>'})" class="btn btn--outline-red">
+                                                <i class="ri-delete-bin-6-line"></i>
+                                            </button>
+                                        <?php endif ?>
                                     </td>
                                 </tr>
                             <?php endforeach ?>
                         </tbody>
                     </table>
                 </div>
-
             <?php endif ?>
-
         </div>
     </div>
 </div>
@@ -235,6 +247,4 @@ if (isset($_GET['edit'])) {
     </div>
 </div>
 
-<?php
-$result->free_result();
-include_once('../template/footer.php') ?>
+<?php include_once('../template/footer.php') ?>

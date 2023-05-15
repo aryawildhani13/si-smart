@@ -22,6 +22,51 @@ include_once('../../api/util/db.php');
     <script src="../assets/js/jquery-3.6.4.min.js"></script>
     <script src="../assets/js/selectize.min.js"></script>
     <script src="../assets/js/jquery.dataTables.min.js"></script>
+    <script>
+        function generateConfirmationDialog(url, body) {
+            return Swal.fire({
+                title: 'Apakah anda yakin?',
+                text: "Anda tidak akan dapat mengembalikan ini!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, saya yakin!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        await $.post(url, body)
+                        await Swal.fire(
+                            'Terhapus!',
+                            'Data berhasil dihapus',
+                            'success',
+                        )
+                    } finally {
+                        location.reload()
+                    }
+                }
+            })
+        }
+        
+        let permission;
+        (async () => {
+            permission = await Notification.requestPermission();
+        })()
+        
+        const pushNotification = (sessionKey = 'tglNotifikasiInstruktur', title, body = '', onClickEvent = () => {}) => {
+            const icon = 'https://i3.lensdump.com/i/k66AYD.png'
+
+            const isNotYetNotified = !sessionStorage.getItem(sessionKey) || sessionStorage.getItem(sessionKey) != new Date().getDate()
+            if (isNotYetNotified && permission === 'granted') {
+                sessionStorage.setItem(sessionKey, new Date().getDate())
+                new Notification(title, {
+                    body,
+                    icon
+                }).onclick = () => onClickEvent();
+            }
+        }
+    </script>
+
     <script src="../assets/js/flowbite.min.js" defer></script>
     <script src="../assets/js/script.js" defer></script>
 
@@ -32,6 +77,7 @@ include_once('../../api/util/db.php');
         else
             document.documentElement.classList.remove('dark')
     </script>
+
     <title>SMART App</title>
 </head>
 

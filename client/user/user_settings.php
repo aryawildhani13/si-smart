@@ -8,7 +8,7 @@ $sql = "SELECT * FROM $role WHERE id_$role = '$id_user' LIMIT 1";
 $data_user = $db->query($sql)->fetch_assoc();
 ?>
 
-<div id="pengaturan" class="w-full min-h-screen flex">
+<div class="w-full min-h-screen flex">
     <?php include_once '../components/dashboard_sidebar.php' ?>
     <div class="w-full flex flex-col">
         <div class="p-4 sm:ml-64">
@@ -79,7 +79,7 @@ $data_user = $db->query($sql)->fetch_assoc();
                                             </div>
                                             <div class="flex flex-col gap-2">
                                                 <label class="text-lg text-gray-500 dark:text-white">Status Keaktifan</label>
-                                                <p class="font-semibold text-green-500">Aktif</p>
+                                                <p class="font-semibold  <?= $data_user['status'] ? 'text-green-500' : 'text-red-500'?>"><?= $data_user['status'] ? $data_user['status'] : 'Nonaktif' ?></p>
                                             </div>
                                         </div>
                                     </div>

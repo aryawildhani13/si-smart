@@ -5,12 +5,12 @@ const refreshTime = () => {
     $('#live-clock').text(timeString)
 }
 
-refreshTime()
-setInterval(() => {
-    refreshTime()
-}, 60000)
-
 $(document).ready(() => {
+    refreshTime()
+    setInterval(() => {
+        refreshTime()
+    }, 1000)
+
     const url = location.href
     const urlFilename = url.substring(url.lastIndexOf('/') + 1).match(/(.*.php)/)[0]
 
@@ -21,14 +21,75 @@ $(document).ready(() => {
             && $(this).addClass('active')
     })
 
+    $('#check_all').on('click', function (e) {
+        let condition = this.checked
+        if (condition) {
+            $("input[name='delete_pertemuan[]']").each(function () {
+                this.checked = true
+            })
+        } else {
+            $("input[name='delete_pertemuan[]']").each(function () {
+                this.checked = false
+            })
+        }
+    })
+
     $('select.selectize').selectize({
         onFocus: function () {
             $(this)[0].clear()
         }
     })
 
+    let sidebarItem = $('.dashboard__sidebar-item').map(function () {
+        return {
+            name: $(this).prop('innerText'),
+            src: $(this).attr('href')
+        }
+    })
+
+    $('select.selectize-search').selectize({
+        valueField: "src",
+        labelField: "name",
+        delimiter: " - ",
+        searchField: ["name", "src"],
+        options: sidebarItem,
+        persist: false,
+        onDropdownOpen: function ($dropdown) {
+            // Manually prevent dropdown from opening when there is no search term
+            if (!this.lastQuery) {
+                this.close();
+            }
+        },
+        onItemAdd: function (v, $item) {
+            window.location = v
+        },
+        onType: function (str) {
+            if (str === "") {
+                this.close();
+            }
+        },
+        onFocus: function () {
+            $(this)[0].clear()
+        },
+
+    })
+
+    $('select.selectize.group').selectize({
+        sortField: 'text'
+    })
+
     $('.datatable').DataTable();
 
+    $('.datatable-disable-paging').DataTable({
+        "paging": false
+    })
+
+    $('.datatable-add-siswa').DataTable({
+        "searching": false,
+        "scrollY": "500px",
+        "scrollCollapse": true,
+        "paging": false,
+    });
 })
 
 let themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');

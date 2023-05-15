@@ -1,7 +1,7 @@
 <?php
 include_once('../template/header.php');
 include_once('../../api/auth/access_control.php');
-user_access(['Super Admin', 'Admin Akademik']);
+user_access('admin', 'jadwal.php');
 
 $hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
 $jam_kbm = ["14:30:00", "15:30:00", "16:30:00", "17:30:00"];
@@ -9,12 +9,16 @@ $sql = "SELECT * FROM jenjang";
 $data_jenjang = $db->query($sql) or die($db->error);
 $data_jenjang->fetch_assoc();
 
-$sql = "SELECT j.*, k.nama nama_kelas, i.nama nama_instruktur, k.status, je.nama nama_jenjang, s.nama ketua_kelas, m.nama nama_mapel FROM jadwal j
+$sql = "SELECT j.*, k.nama nama_kelas, i.nama nama_instruktur, k.status, je.nama nama_jenjang, s.nama ketua_kelas, m.nama nama_mapel, COUNT(dj.id_detail_jadwal) count_detail_jadwal FROM jadwal j
 JOIN kelas k ON j.id_kelas = k.id_kelas
 JOIN jenjang je ON k.id_jenjang = je.id_jenjang
 JOIN mapel m ON j.id_mapel = m.id_mapel
+LEFT JOIN detail_jadwal dj ON j.id_jadwal = dj.id_jadwal
 LEFT JOIN instruktur i ON j.id_instruktur = i.id_instruktur
-LEFT JOIN siswa s ON k.id_ketua_kelas = s.id_siswa";
+LEFT JOIN siswa s ON k.id_ketua_kelas = s.id_siswa
+GROUP BY j.id_jadwal
+ORDER BY nama_kelas, nama_jenjang, hari
+";
 $data_jadwal = $db->query($sql) or die($db->error);
 $data_jadwal->fetch_assoc();
 
@@ -29,13 +33,16 @@ if (isset($_GET['jenjang'])) {
     $data_kelas = $db->query($sql) or die($db->error);
     $data_kelas->fetch_assoc();
 
-    $sql = "SELECT j.*, k.nama nama_kelas, i.nama nama_instruktur, k.status, je.nama nama_jenjang, s.nama ketua_kelas, m.nama nama_mapel FROM jadwal j
+    $sql = "SELECT j.*, k.nama nama_kelas, i.nama nama_instruktur, k.status, je.nama nama_jenjang, s.nama ketua_kelas, m.nama nama_mapel, COUNT(dj.id_detail_jadwal) count_detail_jadwal FROM jadwal j
     JOIN kelas k ON j.id_kelas = k.id_kelas
     JOIN jenjang je ON k.id_jenjang = je.id_jenjang
     JOIN mapel m ON j.id_mapel = m.id_mapel
-    LEFT JOIN siswa s ON k.id_ketua_kelas = s.id_siswa
+    LEFT JOIN detail_jadwal dj ON j.id_jadwal = dj.id_jadwal
     LEFT JOIN instruktur i ON j.id_instruktur = i.id_instruktur
-    WHERE je.id_jenjang = $id_jenjang";
+    LEFT JOIN siswa s ON k.id_ketua_kelas = s.id_siswa
+    WHERE je.id_jenjang = $id_jenjang
+    GROUP BY j.id_jadwal
+    ORDER BY nama_kelas, nama_jenjang, hari";
     $data_jadwal = $db->query($sql) or die($db->error);
     $data_jadwal->fetch_assoc();
 }
@@ -68,23 +75,22 @@ if (isset($_GET['assign_instruktur'])) {
 }
 ?>
 
-<div id="jadwal" class="w-full min-h-screen flex">
+<div class="w-full min-h-screen flex">
     <?php include_once '../components/dashboard_sidebar.php' ?>
     <div class="w-full flex flex-col">
         <div class="p-4 sm:ml-64">
             <?php include_once '../components/dashboard_navbar.php'; ?>
-            <div class="flex items-center gap-5">
+            <div class="flex items-center gap-5 my-7">
                 <?php if (!isset($_GET['assign_instruktur'])) : ?>
-                    <h4 class="my-7 font-semibold text-gray-800 dark:text-white">Jadwal</h4>
+                    <h4 class="font-semibold text-gray-800 dark:text-white">Jadwal</h4>
                 <?php endif ?>
                 <?php if (isset($_GET['jenjang'])) : ?>
-                    <button data-modal-target="add_jadwal_modal" data-modal-toggle="add_jadwal_modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+                    <button data-modal-target="add_jadwal_modal" data-modal-toggle="add_jadwal_modal" class="btn" type="button">
                         Tambah Jadwal
                     </button>
                 <?php endif ?>
             </div>
             <?php if (isset($_GET['assign_instruktur'])) { ?>
-
                 <div class="flex gap-2 mt-5 flex-col lg:flex-row">
                     <div class="flex w-full lg:w-1/4 flex-col rounded bg-gray-200 dark:bg-gray-600 p-5 space-y-3 text-gray-800 dark:text-white">
                         <h5>Detail Jadwal</h5>
@@ -172,14 +178,14 @@ if (isset($_GET['assign_instruktur'])) {
                 </form>
             <?php } else { ?>
                 <?php generate_breadcrumb([['title' => 'Jadwal', 'filename' => 'jadwal.php']]); ?>
-                <ul class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400">
+                <ul class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400 mt-5">
                     <?php foreach ($data_jenjang as $key => $jenjang) : ?>
                         <li class="mr-2">
                             <a href="?jenjang=<?= $jenjang['id_jenjang'] ?>" class="inline-block p-4 rounded-t-lg hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300 <?= isset($_GET['jenjang']) && $_GET['jenjang'] === $jenjang['id_jenjang'] ? 'text-blue-500' : '' ?>"><?= $jenjang['nama'] ?></a>
                         </li>
                     <?php endforeach ?>
                 </ul>
-                <div class="relative overflow-x-auto mt-5">
+                <div class="relative overflow-x-auto">
                     <table class="datatable w-full text-sm text-left text-gray-500 dark:text-gray-400">
                         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
@@ -209,21 +215,23 @@ if (isset($_GET['assign_instruktur'])) {
                                     <td class="px-6 py-4"><?= $jadwal['hari'] ?></td>
                                     <td class="px-6 py-4"><?= $jadwal['jam_mulai'] ?></td>
                                     <td class="px-6 py-4"><?= $jadwal['jam_selesai'] ?></td>
-                                    <td class="px-6 py-4 flex-1 flex-col space-y-5">
-                                        <a class="btn btn--outline-green group text-gray-800 hover:text-white dark:text-white flex gap-2" href="?assign_instruktur=<?= $jadwal['id_jadwal'] ?>">
-                                            <i class="ri-arrow-left-right-line"></i>
-                                            <p>Ganti Instruktur</p>
-                                        </a>
-                                        <?php if (!$jadwal['nama_instruktur']) : ?>
-                                            <a class="btn btn--outline-blue group flex" href="?edit=<?= $jadwal['id_jadwal'] ?>">
-                                                <i class="ri-edit-box-line text-blue-500 mx-auto group-hover:text-white"></i>
+                                    <td class="px-6 py-4">
+                                        <div class="flex gap-3">
+                                            <a class="btn btn--outline-green flex justify-around gap-3" href="?assign_instruktur=<?= $jadwal['id_jadwal'] ?>">
+                                                <i class="ri-arrow-left-right-line"></i>
+                                                <p>Ganti Instruktur</p>
                                             </a>
-                                        <?php endif ?>
-                                        <form action="../../api/admin/jadwal.php" method="post">
-                                            <button class="btn btn--outline-red group flex w-full" type="submit" name="delete" value="<?= $jadwal['id_jadwal'] ?>">
-                                                <i class="ri-delete-bin-6-line text-red-500 mx-auto group-hover:text-white"></i>
-                                            </button>
-                                        </form>
+                                            <?php if (!$jadwal['nama_instruktur']) : ?>
+                                                <a class="btn btn--outline-blue group flex" href="?edit=<?= $jadwal['id_jadwal'] ?>">
+                                                    <i class="ri-edit-box-line text-blue-500 mx-auto group-hover:text-white"></i>
+                                                </a>
+                                            <?php endif ?>
+                                            <?php if ($jadwal['count_detail_jadwal'] < 1) : ?>
+                                                <button onclick="generateConfirmationDialog('../../api/admin/jadwal.php', {delete: '<?= $jadwal['id_jadwal'] ?>'})" class="btn btn--outline-red">
+                                                    <i class="ri-delete-bin-6-line"></i>
+                                                </button>
+                                            <?php endif ?>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach ?>
@@ -298,7 +306,7 @@ if (isset($_GET['assign_instruktur'])) {
                     </div>
                     <!-- Modal footer -->
                     <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
-                        <button type="submit" name="create" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Tambah</button>
+                        <button type="submit" name="create" class="btn btn--blue">Tambah</button>
                     </div>
                 </form>
             </div>

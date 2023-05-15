@@ -3,27 +3,12 @@ include_once('../template/header.php');
 include_once('../../api/auth/access_control.php');
 user_access('instruktur');
 
-$bulan = [
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember'
-];
-
 $id_instruktur = $_SESSION['user_id'];
 $sql = "SELECT DISTINCT hari FROM jadwal j  WHERE j.id_instruktur = '$id_instruktur'";
 $data_pertemuan = $db->query($sql) or die($db->error);
 ?>
 
-<div id="pertemuan" class="w-full min-h-screen flex">
+<div class="w-full min-h-screen flex">
     <?php include_once '../components/dashboard_sidebar.php' ?>
     <div class="w-full flex flex-col">
         <div class="p-4 sm:ml-64">
@@ -31,13 +16,13 @@ $data_pertemuan = $db->query($sql) or die($db->error);
             generate_breadcrumb([['title' => 'Pertemuan', 'filename' => 'pertemuan.php']]);
             ?>
             <div class="flex justify-between items-center">
-                <h4 class="my-7 font-semibold text-gray-800 dark:text-white">Data Pertemuan Bulan <?= $bulan[date('n') - 1] ?></h4>
+                <h4 class="my-7 font-semibold text-gray-800 dark:text-white">Data Pertemuan Bulan <?= BULAN[date('n') - 1] ?></h4>
             </div>
             <div class="relative overflow-x-auto">
                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-center"></th>
+                            <th scope="col" class="px-6 py-3 text-center">Hari</th>
                             <th scope="col" class="px-6 py-3 text-center">14.30</th>
                             <th scope="col" class="px-6 py-3 text-center">15.30</th>
                             <th scope="col" class="px-6 py-3 text-center">16.30</th>

@@ -8,7 +8,7 @@ $sql = "SELECT * FROM pengajuan p WHERE p.id_siswa = '$id_siswa'";
 $data_tunggakan = $db->query($sql);
 ?>
 
-<div id="pengajuan" class="w-full min-h-screen flex">
+<div class="w-full min-h-screen flex">
     <?php include_once '../components/dashboard_sidebar.php' ?>
     <div class="w-full flex flex-col">
         <div class="p-4 sm:ml-64">
@@ -40,7 +40,7 @@ $data_tunggakan = $db->query($sql);
                                 <td class="px-6 py-4"><?= $row['keterangan'] ?></td>
                                 <td class="px-6 py-4"><?= $row['status'] ?></td>
                                 <form action="../../api/siswa/pengajuan.php" method="post">
-                                    <td class="px-6 py-4"><button type="submit" name="delete" value="<?= $row['id_pengajuan'] ?>" class="text-red-500"><i class="ri-delete-bin-line"></i></button></td>
+                                    <td class="px-6 py-4"><button type="submit" name="delete" value="<?= $row['id_pengajuan'] ?>" class="btn btn--outline-red"><i class="ri-delete-bin-line"></i></button></td>
                                 </form>
                             </tr>
                         <?php endwhile ?>
@@ -70,14 +70,14 @@ $data_tunggakan = $db->query($sql);
                 <!-- Modal body -->
                 <div class="modal__body">
                     <label class="block" for="judul">Judul</label>
-                    <input id="judul" class="border rounded w-full py-1.5 px-2 border-gray-400 mt-1" name="judul" />
+                    <input id="judul" class="border rounded w-full py-1.5 px-2 border-gray-400 mt-1" name="judul" required />
 
                     <label for="keterangan" class="block">Keterangan</label>
                     <textarea name="keterangan" id="keterangan" rows="4" class="border rounded w-full py-1.5 px-2 border-gray-400 mt-1" placeholder="Write your thoughts here..."></textarea>
                 </div>
                 <!-- Modal footer -->
                 <div class="modal__footer">
-                    <button data-modal-hide="add-pengajuan-modal" name="create" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
+                    <button name="create" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
                     <button data-modal-hide="add-pengajuan-modal" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Close</button>
                 </div>
             </form>

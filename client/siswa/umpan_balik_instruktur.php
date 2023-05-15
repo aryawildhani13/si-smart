@@ -11,7 +11,7 @@ $data_instruktur = $db->query($sql) or die($db->error);
 $data_instruktur->fetch_assoc();
 ?>
 
-<div id="umpan_balik_instruktur" class="w-full min-h-screen flex">
+<div class="w-full min-h-screen flex">
     <?php include_once '../components/dashboard_sidebar.php' ?>
     <div class="w-full flex flex-col">
         <div class="p-4 sm:ml-64">
@@ -47,9 +47,11 @@ $data_instruktur->fetch_assoc();
                                         <i class="ri-star-fill text-amber-500"></i>
                                     <?php endfor ?>
                                 <td class="px-6 py-4"><?= $row['tgl_dibuat'] ?></td>
-                                <form action="../../api/siswa/umpan_balik.php" method="post">
-                                    <td class="px-6 py-4"><button type="submit" name="delete_instruktur" value="<?= $row['id_kuesioner'] ?>"><i class="ri-delete-bin-line text-red-500"></i></button></td>
-                                </form>
+                                <td class="px-6 py-4">
+                                    <form action="../../api/siswa/umpan_balik.php" method="post">
+                                        <button type="submit" name="delete_instruktur" value="<?= $row['id_kuesioner'] ?>" class="btn btn--outline-red"><i class="ri-delete-bin-line"></i></button>
+                                    </form>
+                                </td>
                             </tr>
                         <?php endwhile ?>
                     </tbody>
@@ -78,10 +80,10 @@ $data_instruktur->fetch_assoc();
                 <!-- Modal body -->
                 <div class="modal__body">
                     <label class="block" for="id_instruktur">Instruktur</label>
-                    <select class="input" id="id_instruktur" name="id_instruktur" required>
-                        <?php while (($data = mysqli_fetch_assoc($data_instruktur))) { ?>
-                            <option value="<?= $data['id_instruktur'] ?>"><?= $data['nama'] ?></option>
-                        <?php } ?>
+                    <select class="selectize input" id="id_instruktur" name="id_instruktur" required>
+                        <?php foreach ($data_instruktur as $instruktur) : ?>
+                            <option value="<?= $instruktur['id_instruktur'] ?>"><?= $instruktur['nama'] ?></option>
+                        <?php endforeach ?>
                     </select>
 
                     <label for="deskripsi" class="block">Deskripsi</label>

@@ -1,7 +1,7 @@
 <?php
 include_once('../template/header.php');
 include_once('../../api/auth/access_control.php');
-user_access(['Super Admin', 'Admin Akademik']);
+user_access('admin', 'instruktur.php');
 $sql = "SELECT * FROM jenjang";
 $data_jenjang = $db->query($sql) or die($db);
 $data_jenjang->fetch_assoc();
@@ -24,13 +24,17 @@ if (isset($_GET['edit'])) {
         $data_mapel_instruktur[] = $mapel['id_mapel'];
     }
 } else {
-    $sql = "SELECT * FROM instruktur";
+    $sql = "SELECT *,
+    (SELECT COUNT(*) FROM jadwal WHERE id_instruktur = i.id_instruktur) count_jadwal,
+    (SELECT COUNT(*) FROM detail_jadwal WHERE id_instruktur = i.id_instruktur) count_detail_jadwal,
+    (SELECT COUNT(*) FROM detail_mapel WHERE id_instruktur = i.id_instruktur) count_mapel
+    FROM instruktur i";
     $result = $db->query($sql) or die($db);
     $result->fetch_assoc();
 }
 ?>
 
-<div id="anggota_kelas" class="w-full min-h-screen flex">
+<div class="w-full min-h-screen flex">
     <?php include_once '../components/dashboard_sidebar.php' ?>
     <div class="w-full flex flex-col">
         <div class="p-4 sm:ml-64">
@@ -52,36 +56,47 @@ if (isset($_GET['edit'])) {
                 <div class="flex gap-5 mt-5 flex-col lg:flex-row lg:items-start">
                     <div class="flex flex-1 flex-col gap-5 bg-gray-200 dark:bg-gray-700 shadow-lg rounded p-5">
                         <h4 class="text-gray-800 dark:text-white">Data Personal</h4>
-                        <form class="flex-1 flex flex-col justify-between" action="../../api/admin/instruktur.php" method="post">
-                            <div class="mb-5">
-                                <label for="nama" class="form-label text-secondary text-gray-400 dark:text-white">Nama</label>
-                                <input type="text" class="border rounded w-full py-1.5 border-gray-400 mt-1" id="nama" name="nama" value="<?= $result['nama'] ?>" maxlength="50" required>
+                        <form class="form flex-1 flex flex-col justify-between gap-3" action="../../api/admin/instruktur.php" method="post">
+                            <div class="space-y-2">
+                                <label for="nama">Nama</label>
+                                <input type="text" class="input" id="nama" name="nama" value="<?= $result['nama'] ?>" maxlength="50" required>
                             </div>
-                            <div class="mb-5">
-                                <label for="no_telp" class="form-label text-secondary text-gray-400 dark:text-white">No Telp</label>
-                                <input type="text" class="border rounded w-full py-1.5 border-gray-400 mt-1" id="no_telp" name="no_telp" value="<?= $result['no_telp'] ?>" maxlength="14" required>
+                            <div class="space-y-2">
+                                <label for="no_telp">No Telp</label>
+                                <input type="text" class="input" id="no_telp" name="no_telp" value="<?= $result['no_telp'] ?>" maxlength="14" required>
                             </div>
-                            <div class="mb-5">
-                                <label for="alamat" class="form-label text-secondary text-gray-400 dark:text-white">Alamat</label>
-                                <textarea class="resize-none border rounded w-full py-1.5 border-gray-400 mt-1" name="alamat" id="" cols="30" rows="3" maxlength="50"><?= $result['alamat'] ?>"</textarea>
+                            <div class="space-y-2">
+                                <label for="alamat">Alamat</label>
+                                <textarea class="resize-none input" name="alamat" id="" cols="30" rows="3" maxlength="50"><?= $result['alamat'] ?>"</textarea>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="alamat">Alamat</label>
+                                <textarea class="resize-none input" name="alamat" id="" cols="30" rows="3" maxlength="50"><?= $result['alamat'] ?>"</textarea>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="status">Status</label>
+                                <select name="status" id="status" class="input">
+                                    <option value="Aktif">Aktif</option>
+                                    <option value="Pensiun">Pensiun</option>
+                                </select>
                             </div>
                             <button type="submit" class="w-full bg-orange-500 rounded py-1.5 text-white" name="update_profil" value="<?= $result['id_instruktur'] ?>">Ubah Data Profil</button>
                         </form>
                     </div>
                     <div class="flex flex-1 flex-col gap-5 bg-gray-200 dark:bg-gray-700 shadow-lg rounded p-5">
                         <h4 class="text-gray-800 dark:text-white">Data Kredensial</h4>
-                        <form class="flex-1 flex flex-col justify-between" action="../../api/admin/instruktur.php" method="post">
-                            <div class="mb-5">
-                                <label for="email" class="form-label text-secondary text-gray-400 dark:text-white">Email</label>
-                                <input type="email" class="border rounded w-full py-1.5 border-gray-400 mt-1" id="email" name="email" value="<?= $result['email'] ?>" maxlength="30" required>
+                        <form class="form flex-1 flex flex-col justify-between gap-3" action="../../api/admin/instruktur.php" method="post">
+                            <div class="space-y-2">
+                                <label for="email">Email</label>
+                                <input type="email" class="input" id="email" name="email" value="<?= $result['email'] ?>" maxlength="30" required>
                             </div>
-                            <div class="mb-5">
-                                <label for="password" class="form-label text-secondary text-gray-400 dark:text-white">Password</label>
-                                <input type="password" class="border rounded w-full py-1.5 border-gray-400 mt-1" id="password" name="password" value="<?= $result['password'] ?>" maxlength="50" required>
+                            <div class="space-y-2">
+                                <label for="password">Password</label>
+                                <input type="password" class="input" id="password" name="password" value="<?= $result['password'] ?>" maxlength="50" required>
                             </div>
-                            <div class="mb-5">
-                                <label for="confirm_password" class="form-label text-secondary text-gray-400 dark:text-white">Konfirmasi Password</label>
-                                <input type="password" class="border rounded w-full py-1.5 border-gray-400 mt-1" id="confirm_password" name="confirm_password" value="<?= $result['password'] ?>" maxlength="50" required>
+                            <div class="space-y-2">
+                                <label for="confirm_password">Konfirmasi Password</label>
+                                <input type="password" class="input" id="confirm_password" name="confirm_password" value="<?= $result['password'] ?>" maxlength="50" required>
                             </div>
                             <button type="submit" class="w-full bg-red-500 rounded py-1.5 text-white" name="update_kredensial" value="<?= $result['id_instruktur'] ?>">Ubah Data Kredensial</button>
                         </form>
@@ -141,7 +156,7 @@ if (isset($_GET['edit'])) {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($result as $key => $value) : ?>
+                            <?php foreach ($result as $main_key => $value) : ?>
                                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                     <th class="px-6 py-4 text-amber-500"></th>
                                     <td class="px-6 py-4"><?= $value['nama'] ?></td>
@@ -150,16 +165,26 @@ if (isset($_GET['edit'])) {
                                     <td class="px-6 py-4"><?= $value['email'] ?></td>
                                     <td class="px-6 py-4"><?= $value['status'] ?></td>
                                     <td class="px-6 py-4">
-                                        <ul>
-                                            <?php
-                                            $id_instruktur = $value['id_instruktur'];
-                                            $sql = "SELECT j.nama nama_jenjang, m.nama nama_mapel  FROM instruktur i, mapel m, detail_mapel dm, jenjang j WHERE dm.id_mapel = m.id_mapel AND dm.id_instruktur = i.id_instruktur AND m.id_jenjang = j.id_jenjang AND i.id_instruktur = '$id_instruktur'";
-                                            $mapel_diampu = $db->query($sql) or die(mysqli_error($db));
-                                            $mapel_diampu->fetch_assoc();
-                                            foreach ($mapel_diampu as $key => $mapel) : ?>
-                                                <li><?= $mapel['nama_jenjang'] ?> - <?= $mapel['nama_mapel'] ?> </li>
-                                            <?php endforeach ?>
-                                        </ul>
+                                        <div class="flex gap-1">
+                                            <?= $value['count_mapel'] ?>
+                                            <button data-popover-target="data_mapel_instruktur<?= $main_key ?>" data-popover-placement="right" type="button" class="text-white"><i class="ri-question-line"></i></button>
+                                            <div data-popover id="data_mapel_instruktur<?= $main_key ?>" role="tooltip" class="absolute z-10 invisible inline-block w-64 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 dark:text-gray-400 dark:border-gray-600 dark:bg-gray-800">
+                                                <div class="px-3 py-2 bg-gray-100 border-b border-gray-200 rounded-t-lg dark:border-gray-600 dark:bg-gray-700">
+                                                    <h5 class="font-semibold text-gray-900 dark:text-white">Mapel yang diampu</h5>
+                                                </div>
+                                                <div class="px-3 py-2 space-y-2">
+                                                    <?php
+                                                    $id_instruktur = $value['id_instruktur'];
+                                                    $sql = "SELECT j.nama nama_jenjang, m.nama nama_mapel  FROM instruktur i, mapel m, detail_mapel dm, jenjang j WHERE dm.id_mapel = m.id_mapel AND dm.id_instruktur = i.id_instruktur AND m.id_jenjang = j.id_jenjang AND i.id_instruktur = '$id_instruktur'";
+                                                    $mapel_diampu = $db->query($sql) or die(mysqli_error($db));
+                                                    $mapel_diampu->fetch_assoc();
+                                                    foreach ($mapel_diampu as $key => $mapel) : ?>
+                                                        <p><?= $mapel['nama_jenjang'] ?> - <?= $mapel['nama_mapel'] ?></p>
+                                                    <?php endforeach ?>
+                                                </div>
+                                                <div data-popper-arrow></div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4">
                                         <?php
@@ -173,12 +198,15 @@ if (isset($_GET['edit'])) {
                                         ?>
                                     </td>
                                     <td class="px-6 py-4 flex gap-2">
-                                        <a class="btn btn--outline-blue group" href="?edit=<?= $value['id_instruktur'] ?>">
-                                            <i class="ri-edit-box-line text-blue-500 group-hover:text-white"></i>
+                                        <a class="btn btn--outline-blue" href="?edit=<?= $value['id_instruktur'] ?>">
+                                            <i class="ri-edit-box-line"></i>
                                         </a>
-                                        <form action="../../api/admin/instruktur.php" method="post">
-                                            <button class="btn btn--outline-blue group" type="submit" name="delete" value="<?= $value['id_instruktur'] ?>"><i class="ri-delete-bin-6-line text-red-500 group-hover:text-white"></i></button>
-                                        </form>
+
+                                        <?php if ($value['count_jadwal'] === "0" && $value['count_detail_jadwal'] === "0") : ?>
+                                            <button onclick="generateConfirmationDialog('../../api/admin/instruktur.php', {delete: '<?= $value['id_instruktur'] ?>'})" class="btn btn--outline-red">
+                                                <i class="ri-delete-bin-6-line"></i>
+                                            </button>
+                                        <?php endif ?>
                                     </td>
                                 </tr>
                             <?php endforeach ?>
@@ -195,7 +223,7 @@ if (isset($_GET['edit'])) {
         <!-- Modal content -->
         <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
             <div class="px-6 py-6 lg:px-8">
-                <form action="../../api/admin/instruktur.php" method="post">
+                <form class="form" action="../../api/admin/instruktur.php" method="post">
                     <!-- Modal header -->
                     <div class="flex items-start justify-between border-b rounded-t dark:border-gray-600">
                         <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
@@ -209,31 +237,31 @@ if (isset($_GET['edit'])) {
                         </button>
                     </div>
                     <div class="pt-6 flex gap-5">
-                        <div class="flex-1 flex flex-col" method="post">
-                            <div class="mb-5">
-                                <label for="nama" class="form-label text-secondary text-gray-400 dark:text-white">Nama</label>
-                                <input type="text" class="border rounded w-full py-1.5 border-gray-400 mt-1" id="nama" name="nama" maxlength="50" required>
+                        <div class="flex-1 flex flex-col space-y-2">
+                            <div class="space-y-2">
+                                <label for="nama">Nama</label>
+                                <input type="text" class="input" id="nama" name="nama" maxlength="50" required>
                             </div>
-                            <div class="mb-5">
-                                <label for="no_telp" class="form-label text-secondary text-gray-400 dark:text-white">No Telp</label>
-                                <input type="text" class="border rounded w-full py-1.5 border-gray-400 mt-1" id="no_telp" name="no_telp" maxlength="14" required>
+                            <div class="space-y-2">
+                                <label for="no_telp">No Telp</label>
+                                <input type="text" class="input" id="no_telp" name="no_telp" maxlength="14" required>
                             </div>
-                            <div class="mb-5">
-                                <label for="alamat" class="form-label text-secondary text-gray-400 dark:text-white">Alamat</label>
-                                <textarea class="resize-none border rounded w-full py-1.5 border-gray-400 mt-1" name="alamat" id="" cols="30" rows="3" maxlength="50"></textarea>
-                            </div>
-                        </div>
-                        <div class="flex-1 flex flex-col" method="post">
-                            <div class="mb-5">
-                                <label for="email" class="form-label text-secondary text-gray-400 dark:text-white">Email</label>
-                                <input type="email" class="border rounded w-full py-1.5 border-gray-400 mt-1" id="email" name="email" maxlength="30" required>
-                            </div>
-                            <div class="mb-5">
-                                <label for="password" class="form-label text-secondary text-gray-400 dark:text-white">Password</label>
-                                <input type="text" class="border rounded w-full py-1.5 border-gray-400 mt-1" id="password" name="password" maxlength="50" required>
+                            <div class="space-y-2">
+                                <label for="alamat">Alamat</label>
+                                <textarea class="resize-none input" name="alamat" id="" cols="30" rows="3" maxlength="50"></textarea>
                             </div>
                         </div>
-                        <div id="form_mapel_instruktur" class="flex-1 flex flex-col" method="post">
+                        <div class="flex-1 flex flex-col space-y-2">
+                            <div class="space-y-2">
+                                <label for="email">Email</label>
+                                <input type="email" class="input" id="email" name="email" maxlength="30" required>
+                            </div>
+                            <div class="space-y-2">
+                                <label for="password">Password</label>
+                                <input type="text" class="input" id="password" name="password" maxlength="50" required>
+                            </div>
+                        </div>
+                        <div id="form_mapel_instruktur" class="flex-1 flex flex-col">
                             <p class="text-normal text-gray-400 dark:text-white">Mapel</p>
                             <div class="flex flex-col gap-5">
                                 <div id="accordion-collapse" data-accordion="collapse">
