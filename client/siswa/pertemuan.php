@@ -35,7 +35,7 @@ if (isset($_GET['pergantian_instruktur'])) {
     $data_instruktur = $db->query($sql) or die($db->error);
     $data_instruktur->fetch_assoc();
 } else {
-    $sql = "SELECT *, m.nama nama_mapel, i.nama nama_instruktur, abs.status status_kehadiran FROM detail_jadwal dj
+    $sql = "SELECT *, dj.id_detail_jadwal, m.nama nama_mapel, i.nama nama_instruktur, abs.status status_kehadiran FROM detail_jadwal dj
     JOIN jadwal j ON dj.id_jadwal = j.id_jadwal
     JOIN mapel m ON j.id_mapel = m.id_mapel
     JOIN instruktur i ON j.id_instruktur = i.id_instruktur
@@ -129,7 +129,7 @@ if (isset($_GET['pergantian_instruktur'])) {
                                     </td>
                                     <td class="px-6 py-4">
                                         <?php if ($pertemuan['tgl_pertemuan'] <= date('Y-m-d') || $pertemuan['status_kehadiran_instruktur'] === 'Hadir') : ?>
-                                            <p class="text-red-500">Pertemuan telah usai</p>
+                                            <!-- <p class="text-red-500">Pertemuan telah usai</p> -->
                                         <?php else : ?>
                                             <?php if ($ketua_kelas) : ?>
                                                 <?php if ($pertemuan['status_kehadiran_instruktur'] !== "Proses Pergantian") : ?>
